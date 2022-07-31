@@ -25,35 +25,35 @@ public class KeycloakInitializerRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        log.info("Initializing '{}' realm in Keycloak ...", COMPANY_SERVICE_REALM_NAME);
+        log.info("Initializing '{}' realm in Keycloak ...", WAA_PROJECT_SERVICE_REALM_NAME);
 
         Optional<RealmRepresentation> representationOptional = keycloakAdmin.realms()
                 .findAll()
                 .stream()
-                .filter(r -> r.getRealm().equals(COMPANY_SERVICE_REALM_NAME))
+                .filter(r -> r.getRealm().equals(WAA_PROJECT_SERVICE_REALM_NAME))
                 .findAny();
         if (representationOptional.isPresent()) {
-            log.info("Removing already pre-configured '{}' realm", COMPANY_SERVICE_REALM_NAME);
-            keycloakAdmin.realm(COMPANY_SERVICE_REALM_NAME).remove();
+            log.info("Removing already pre-configured '{}' realm", WAA_PROJECT_SERVICE_REALM_NAME);
+            keycloakAdmin.realm(WAA_PROJECT_SERVICE_REALM_NAME).remove();
         }
 
         // Realm
         RealmRepresentation realmRepresentation = new RealmRepresentation();
-        realmRepresentation.setRealm(COMPANY_SERVICE_REALM_NAME);
+        realmRepresentation.setRealm(WAA_PROJECT_SERVICE_REALM_NAME);
         realmRepresentation.setEnabled(true);
         realmRepresentation.setRegistrationAllowed(true);
 
         // Client
         ClientRepresentation clientRepresentation = new ClientRepresentation();
-        clientRepresentation.setClientId(MOVIES_APP_CLIENT_ID);
+        clientRepresentation.setClientId(APP_CLIENT_ID);
         clientRepresentation.setDirectAccessGrantsEnabled(true);
         clientRepresentation.setPublicClient(true);
-        clientRepresentation.setRedirectUris(Collections.singletonList(MOVIES_APP_REDIRECT_URL));
+        clientRepresentation.setRedirectUris(Collections.singletonList(APP_REDIRECT_URL));
         clientRepresentation.setDefaultRoles(new String[]{WebSecurityConfig.USER});
         realmRepresentation.setClients(Collections.singletonList(clientRepresentation));
 
         // Users
-        List<UserRepresentation> userRepresentations = MOVIES_APP_USERS.stream()
+        List<UserRepresentation> userRepresentations = APP_USERS.stream()
                 .map(userPass -> {
                     // User Credentials
                     CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
@@ -76,31 +76,31 @@ public class KeycloakInitializerRunner implements CommandLineRunner {
         keycloakAdmin.realms().create(realmRepresentation);
 
         // Testing
-        UserPass admin = MOVIES_APP_USERS.get(0);
+        UserPass admin = APP_USERS.get(0);
         log.info("Testing getting token for '{}' ...", admin.getUsername());
 
         Keycloak keycloakMovieApp = KeycloakBuilder.builder().serverUrl(KEYCLOAK_SERVER_URL)
-                .realm(COMPANY_SERVICE_REALM_NAME).username(admin.getUsername()).password(admin.getPassword())
-                .clientId(MOVIES_APP_CLIENT_ID).build();
+                .realm(WAA_PROJECT_SERVICE_REALM_NAME).username(admin.getUsername()).password(admin.getPassword())
+                .clientId(APP_CLIENT_ID).build();
 
         log.info("'{}' token: {}", admin.getUsername(), keycloakMovieApp.tokenManager().grantToken().getToken());
-        log.info("'{}' initialization completed successfully!", COMPANY_SERVICE_REALM_NAME);
+        log.info("'{}' initialization completed successfully!", WAA_PROJECT_SERVICE_REALM_NAME);
     }
 
     private Map<String, List<String>> getClientRoles(UserPass userPass) {
         List<String> roles = new ArrayList<>();
         roles.add(WebSecurityConfig.USER);
         if ("admin".equals(userPass.getUsername())) {
-            roles.add(WebSecurityConfig.MOVIES_MANAGER);
+            roles.add(WebSecurityConfig.MANAGER);
         }
-        return Map.of(MOVIES_APP_CLIENT_ID, roles);
+        return Map.of(APP_CLIENT_ID, roles);
     }
 
     private static final String KEYCLOAK_SERVER_URL = "http://localhost:8080";
-    private static final String COMPANY_SERVICE_REALM_NAME = "company-services";
-    private static final String MOVIES_APP_CLIENT_ID = "waa-project-api";
-    private static final String MOVIES_APP_REDIRECT_URL = "http://localhost:3000/*";
-    private static final List<UserPass> MOVIES_APP_USERS = Arrays.asList(
+    private static final String WAA_PROJECT_SERVICE_REALM_NAME = "waa-project-service";
+    private static final String APP_CLIENT_ID = "waa-project-api";
+    private static final String APP_REDIRECT_URL = "http://localhost:3000/*";
+    private static final List<UserPass> APP_USERS = Arrays.asList(
             new UserPass("admin", "admin"),
             new UserPass("user", "user"));
 

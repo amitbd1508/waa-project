@@ -21,10 +21,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/api/movies", "/api/movies/**", "/actuator/**").permitAll()
-                .antMatchers("/api/movies/**/comments").hasAnyRole(MOVIES_MANAGER, USER)
-                .antMatchers("/api/movies", "/api/movies/**").hasRole(MOVIES_MANAGER)
-                .antMatchers("/api/userextras/me").hasAnyRole(MOVIES_MANAGER, USER)
+                .antMatchers("/api/products/**").hasAnyRole(MANAGER, USER)
                 .antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
                 .antMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated();
@@ -43,6 +40,6 @@ public class WebSecurityConfig {
         return jwtDecoder;
     }
 
-    public static final String MOVIES_MANAGER = "MOVIES_MANAGER";
+    public static final String MANAGER = "MANAGER";
     public static final String USER = "USER";
 }
