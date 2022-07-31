@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: waa-project-api
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/project-db
+    username: postgres
+    password: Pass2020!
+
+  properties:
+    hibernate:
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+      format_sql: true
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+
+    show-sql: true
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+  main:
+    allow-circular-references: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/company-services
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+
+jwt:
+  auth:
+    converter:
+      resource-id: waa-project-api
+      principal-attribute: preferred_username
+
+app:
+  cors:
+    allowed-origins: http://localhost:3000
+
+management:
+  endpoints:
+    web:
+      exposure.include: beans, env, health, info, metrics, mappings
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  show-actuator: true
+  swagger-ui:
+    groups-order: DESC
+    disable-swagger-default-url: true
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+server:
+  port: 8081
